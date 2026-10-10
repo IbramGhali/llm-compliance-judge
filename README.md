@@ -16,7 +16,7 @@ The problem: a compliance team can listen to a small share of sales calls, so mo
 | Full synthetic set (200 calls) | macro F1 0.890, kappa 0.886 |
 | Evidence grounding | 95.0% of 101 quoted breach verdicts had a verbatim quote; the rest were downgraded |
 | Cost per transcript (estimate) | 5 LLM calls, ~4,900 input and ~1,060 output tokens, **~$0.030** on `claude-haiku-5-5` (extraction) + `claude-opus-5-5` (assessment) |
-| Pipeline overhead | p50 2.4 ms, p95 3.7 ms per transcript with the offline adapter |
+| Pipeline overhead | about 2 ms p50 and 4 ms p95 per transcript with the offline adapter (varies by machine) |
 | Tests | 53: 35 unit, 13 contract, 5 evaluation, plus 1 live-model test excluded by default |
 | Runs on | Windows, macOS, Linux; Python 3.11+; offline by default |
 
