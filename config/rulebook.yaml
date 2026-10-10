@@ -1,0 +1,182 @@
+# Northwind Learning sales-call rulebook (fictional organisation, synthetic rules).
+# Rules are data: change this file, bump the version, and every verdict records which
+# rulebook and rule version produced it. No redeploy needed.
+#
+# Rule kinds
+#   required    : a fact must be present (optionally only when another fact is present)
+#   prohibited  : a fact must not be present; breach needs a verbatim evidence quote
+#   ordering    : fact `first` must appear before fact `then` (when `then` is present)
+#   threshold   : a numeric fact must not exceed `max_value`
+#   conditional : if `trigger` is present, `requires` must follow it before `unless_before`
+#
+# Facts are the labels the extraction stage produces (see prompts/extraction.v1.md).
+
+version: "2026.10.1"
+organisation: Northwind Learning
+
+groups:
+  - id: identity_and_fees
+    title: Identity, fees and consent
+  - id: disclosures
+    title: Required disclosures
+  - id: prohibited_claims
+    title: Prohibited claims
+  - id: customer_care
+    title: Customer care
+
+rules:
+  - id: R01
+    version: 1
+    group: identity_and_fees
+    kind: ordering
+    severity: high
+    title: Confirm identity before discussing fees
+    description: The agent must confirm the customer's identity before any price or fee is mentioned.
+    first: identity_confirmed
+    then: fees_discussed
+
+  - id: R02
+    version: 1
+    group: identity_and_fees
+    kind: required
+    severity: high
+    title: Disclose the total course price
+    description: When fees are discussed, the agent must state the total price of the course, not only a weekly or monthly amount.
+    requires: total_price_disclosed
+    applies_when: fees_discussed
+
+  - id: R03
+    version: 1
+    group: disclosures
+    kind: required
+    severity: high
+    title: Disclose the cooling-off period
+    description: Before enrolling, the agent must tell the customer they can cancel within the 10-day cooling-off period for a full refund.
+    requires: cooling_off_disclosed
+    applies_when: enrolment_processed
+
+  - id: R04
+    version: 2
+    group: disclosures
+    kind: required
+    severity: medium
+    title: Recording notice at the start of the call
+    description: The agent must say the call is recorded within their first two turns.
+    requires: recording_notice
+    within_agent_turns: 2
+
+  - id: R05
+    version: 1
+    group: disclosures
+    kind: required
+    severity: medium
+    title: Explain the refund policy
+    description: Before enrolling, the agent must explain how refunds work after the cooling-off period.
+    requires: refund_policy_explained
+    applies_when: enrolment_processed
+
+  - id: R06
+    version: 1
+    group: disclosures
+    kind: required
+    severity: high
+    title: State payment plan terms
+    description: If a payment plan is offered, the agent must state the instalment amount and the number of instalments.
+    requires: instalment_terms_stated
+    applies_when: payment_plan_offered
+
+  - id: R07
+    version: 1
+    group: disclosures
+    kind: required
+    severity: medium
+    title: State entry requirements
+    description: Before enrolling, the agent must state the course entry requirements.
+    requires: entry_requirements_stated
+    applies_when: enrolment_processed
+
+  - id: R08
+    version: 1
+    group: disclosures
+    kind: required
+    severity: low
+    title: State course duration and study load
+    description: Before enrolling, the agent must state how long the course takes or the expected weekly study hours.
+    requires: duration_stated
+    applies_when: enrolment_processed
+
+  - id: R09
+    version: 1
+    group: prohibited_claims
+    kind: prohibited
+    severity: high
+    title: No guaranteed outcomes
+    description: The agent must not promise a guaranteed job, pass or career outcome.
+    forbids: guaranteed_outcome_claim
+
+  - id: R10
+    version: 1
+    group: prohibited_claims
+    kind: prohibited
+    severity: high
+    title: No false urgency
+    description: The agent must not pressure the customer with false deadlines or claims that an offer ends today.
+    forbids: false_urgency_claim
+
+  - id: R11
+    version: 1
+    group: prohibited_claims
+    kind: prohibited
+    severity: high
+    title: No misrepresented accreditation
+    description: The agent must not describe the course as a university degree or claim university accreditation.
+    forbids: accreditation_claim
+
+  - id: R12
+    version: 1
+    group: prohibited_claims
+    kind: prohibited
+    severity: medium
+    title: No salary promises
+    description: The agent must not quote specific salaries or earnings the customer will receive.
+    forbids: salary_claim
+
+  - id: R13
+    version: 1
+    group: prohibited_claims
+    kind: prohibited
+    severity: high
+    title: Do not discourage cancellation
+    description: The agent must not tell the customer they cannot cancel or discourage them from using the cooling-off period.
+    forbids: cancellation_discouraged
+
+  - id: R14
+    version: 1
+    group: identity_and_fees
+    kind: threshold
+    severity: medium
+    title: Discounts within the approved limit
+    description: The agent must not offer a discount above 15 percent.
+    fact: discount_offered
+    max_value: 15
+
+  - id: R15
+    version: 1
+    group: customer_care
+    kind: conditional
+    severity: high
+    title: Respond to financial hardship
+    description: If the customer mentions financial hardship, the agent must offer a callback or time to think before processing an enrolment.
+    trigger: hardship_mentioned
+    requires: callback_offered
+    unless_before: enrolment_processed
+
+  - id: R16
+    version: 1
+    group: customer_care
+    kind: ordering
+    severity: high
+    title: Explicit consent before enrolment
+    description: The customer must give explicit verbal consent before the agent processes the enrolment.
+    first: enrolment_consent_given
+    then: enrolment_processed

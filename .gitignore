@@ -1,0 +1,25 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Local state and generated data (regenerate with `uv run judge generate`)
+.judge/
+data/
+eval/results/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

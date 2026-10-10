@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review queue</title>
+<style>
+  :root { --bg: #fff; --fg: #1d2330; --muted: #5b6475; --line: #e3e6ec; --breach: #b42318; --unclear: #9a6700; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #11151c; --fg: #e6e9ef; --muted: #9aa3b2; --line: #2a3140; --breach: #f97066; --unclear: #f5c451; } }
+  body { font: 15px/1.5 system-ui, sans-serif; background: var(--bg); color: var(--fg); max-width: 920px; margin: 0 auto; padding: 24px 16px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .meta { color: var(--muted); margin-bottom: 20px; }
+  .item { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; }
+  .tag { font-weight: 600; text-transform: uppercase; font-size: 12px; }
+  .breach { color: var(--breach); } .unclear { color: var(--unclear); }
+  blockquote { margin: 8px 0; padding-left: 12px; border-left: 3px solid var(--line); }
+  form { display: inline-flex; gap: 6px; margin-top: 8px; }
+  button, select { font: inherit; padding: 4px 10px; }
+</style>
+</head>
+<body>
+<h1>Review queue</h1>
+<div class="meta">Run {{ run_id or "none" }}. Unclear verdicts first, then breaches by confidence. Decisions are exported to the golden set with <code>judge review export</code>.</div>
+{% if not items %}<p>Nothing to review.</p>{% endif %}
+{% for v in items %}
+<div class="item">
+  <div><span class="tag {{ v.verdict }}">{{ v.verdict }}</span> {{ v.call_id }}, {{ v.rule_id }}: {{ v.rule.title }} (confidence {{ "%.2f"|format(v.confidence) }}, check: {{ v.post_check }})</div>
+  <div class="meta">{{ v.rationale }}</div>
+  {% if v.evidence_quote %}<blockquote>{{ v.evidence_quote }}</blockquote>{% endif %}
+  {% if v.turn %}<div class="meta">Turn {{ v.turn.index }} ({{ v.turn.speaker }}): {{ v.turn.text }}</div>{% endif %}
+  <form method="post" action="/ui/review/{{ v.id }}">
+    {% if v.verdict == "unclear" %}
+    <select name="label"><option value="breach">breach</option><option value="pass">pass</option></select>
+    <button name="decision" value="confirm">Save label</button>
+    {% else %}
+    <button name="decision" value="confirm">Confirm breach</button>
+    <button name="decision" value="dismiss">Dismiss</button>
+    {% endif %}
+  </form>
+</div>
+{% endfor %}
+</body>
+</html>

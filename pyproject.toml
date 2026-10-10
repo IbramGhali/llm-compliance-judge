@@ -1,0 +1,62 @@
+[project]
+name = "llm-compliance-judge"
+version = "0.1.0"
+description = "LLM-as-a-judge pipeline that reviews sales-call transcripts against a versioned rulebook, with golden-set evaluation, rule health and a human review queue."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "typer>=0.12",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+anthropic = ["anthropic>=1.0"]
+openai = ["openai>=1.40"]
+
+[project.scripts]
+judge = "compliance_judge.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "httpx2>=0.1",
+    "types-PyYAML>=6.0",
+    "jsonschema>=4.22",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/compliance_judge"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src"]
+
+[[tool.mypy.overrides]]
+module = ["anthropic.*", "openai.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["live: calls a real LLM provider (excluded by default, set JUDGE_LIVE_TESTS=1)"]
+addopts = "-m 'not live'"
